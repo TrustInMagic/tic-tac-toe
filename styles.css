@@ -40,7 +40,7 @@ h1 {
   align-items: center;
 }
 
-.playing-board {
+.game-board {
   height: 450px;
   width: 450px;
   border: solid 2px var(--message-color);
