@@ -1,88 +1,66 @@
-const cell = (rowNumber, colNumber) => {
-  let value = '.';
-  const row = rowNumber;
-  const col = colNumber;
+const cell = (r, c) => {
+  let symbol = '';
+  let row = r;
+  let col = c;
+  let value;
 
-  const changeValue = (symbol) => {
-    value = symbol;
+  const setValue = () => {
+    if (symbol === 'X') value = 1;
+    if (symbol === 'O') value = 2;
   };
+
+  const changeSymbol = (value) => {
+    symbol = value;
+  };
+
+  const getSymbol = () => symbol;
   const getValue = () => value;
+  const getRow = () => row;
+  const getCol = () => col;
 
-  const getNeighborTop = () => gameBoard.getBoard()?.[row - 1]?.[col];
-  const getNeighborBottom = () => gameBoard.getBoard()?.[row + 1]?.[col];
-  const getNeighborLeft = () => gameBoard.getBoard()?.[row]?.[col - 1];
-  const getNeighborRight = () => gameBoard.getBoard()?.[row]?.[col + 1];
-  const getNeighborTopLeft = () => gameBoard.getBoard()?.[row - 1]?.[col - 1];
-  const getNeighborTopRight = () => gameBoard.getBoard()?.[row - 1]?.[col + 1];
-  const getNeighborBottomLeft = () =>
-    gameBoard.getBoard()?.[row + 1]?.[col - 1];
-  const getNeighborBottomRight = () =>
-    gameBoard.getBoard()?.[row + 1]?.[col + 1];
-
-  const neighbors = [
-    getNeighborTop,
-    getNeighborLeft,
-    getNeighborRight,
-    getNeighborBottom,
-    getNeighborTopLeft,
-    getNeighborTopRight,
-    getNeighborBottomLeft,
-    getNeighborBottomRight,
-  ];
-
-  const getAllNeighbors = () => neighbors;
-
-  return {
-    getValue,
-    changeValue,
-    getAllNeighbors,
-    getNeighborTop,
-    getNeighborBottom,
-    getNeighborRight,
-    getNeighborTopLeft,
-    getNeighborTopRight,
-    getNeighborBottomLeft,
-    getNeighborBottomRight,
-  };
+  return { getSymbol, changeSymbol, getValue, setValue, getRow, getCol };
 };
 
 const gameBoard = (() => {
-  const board = [];
+  let board = [];
   const rows = 3;
   const cols = 3;
 
-  for (let i = 0; i < rows; i++) {
-    board[i] = [];
-    for (let j = 0; j < cols; j++) {
-      board[i].push(cell(i, j));
+  //drawing the board
+  const populateBoard = () => {
+    for (let i = 0; i < rows; i++) {
+      board[i] = [];
+      for (let j = 0; j < cols; j++) {
+        board[i].push(cell(i, j));
+      }
     }
-  }
+  };
+
+  populateBoard();
+
+  const restartBoard = () => {
+    board = [];
+    populateBoard();
+    gameLogic.restartActivePlayer();
+    renderBoard();
+    playGame();
+  };
 
   const getBoard = () => board;
 
-  return { getBoard };
+  return { getBoard, restartBoard };
 })();
-
-const printBoard = (board) => {
-  let boardSlice = board.slice();
-  let printedBoard = [];
-
-  for (let i = 0; i < board.length; i++) {
-    const printedRow = boardSlice[i].map((element) => element.getValue());
-    printedBoard.push(printedRow);
-  }
-
-  console.table(printedBoard);
-};
 
 const playerFactory = (name, playerSymbol) => {
   return { name, playerSymbol };
 };
 
-const gameFlow = (() => {
+const gameLogic = (() => {
   const playerOne = playerFactory('Bill', 'X');
-  const playerTwo = playerFactory('John', '0');
+  const playerTwo = playerFactory('John', 'O');
   let activePlayer = playerOne;
+  let moves = 0;
+  const message = document.querySelector('.display-message');
 
   const toggleTurn = () => {
     activePlayer === playerOne
@@ -90,115 +68,115 @@ const gameFlow = (() => {
       : (activePlayer = playerOne);
   };
 
+  const restartActivePlayer = () => (activePlayer = playerOne);
+
+  const getPlayerTurn = () => activePlayer;
+
   const validateMove = (board, row, col) => {
-    if (board[row][col].getValue() !== '.') {
+    if (board[row][col].getSymbol() !== '') {
       return false;
     } else return true;
   };
 
   const playTurn = (row, col) => {
+    moves += 1;
     let player = activePlayer;
     let symbol = player.playerSymbol;
     const board = gameBoard.getBoard();
     const targetCell = board[row][col];
 
     if (!validateMove(board, row, col)) {
-      console.log('Invalid move, try again.');
       return false;
     } else {
-      targetCell.changeValue(symbol);
-
-      checkWin(targetCell);
-
-      printBoard(gameBoard.getBoard());
+      targetCell.changeSymbol(symbol);
+      targetCell.setValue();
       toggleTurn();
+      renderBoard();
+      playGame();
+      if (checkWin(board)) {
+        toggleTurn();
+        renderBoard();
+        message.textContent = `Player ${activePlayer.playerSymbol} has won!`;
+      }
+    }
+    
+    if (moves === 9 && !checkWin(board)) {
+      message.textContent = "It's a draw!";
+      console.log('draw');
     }
   };
 
-  return { playTurn };
+  return { playTurn, restartActivePlayer, getPlayerTurn };
 })();
 
-function checkWin(cell) {
-  const cellValue = cell.getValue();
-  const neighborCellFunctions = cell.getAllNeighbors();
-  const neighbors = [];
-  for (let i = 0; i < neighborCellFunctions.length; i++) {
-    neighbors.push(neighborCellFunctions[i]());
-  }
+function checkWin(board) {
+  const b = board;
 
-  const checkNeighborCellValue = () => {
-    const sameValueNeighbors = [];
+  const winningCombinations = [
+    // rows
+    [...b[0]],
+    [...b[1]],
+    [...b[2]],
+    //columns
+    [b[0][0], b[1][0], b[2][0]],
+    [b[0][1], b[1][1], b[2][1]],
+    [b[0][2], b[1][2], b[2][2]],
+    //diagonals
+    [b[0][0], b[1][1], b[2][2]],
+    [b[0][2], b[1][1], b[2][0]],
+  ];
 
-    for (let i = 0; i < neighbors.length; i++) {
-      if (neighbors[i] == undefined) {
-        continue;
-      } else if (neighbors[i].getValue() === cellValue) {
-        let neighborAndIndex = [neighbors[i], i];
-        sameValueNeighbors.push(neighborAndIndex);
-      }
-    }
-
-    return sameValueNeighbors;
-  };
-
-  const neighborsWithSameValue = checkNeighborCellValue();
-  const potentialCellsToFormLine = [];
-
-  if (neighborsWithSameValue.length > 0) {
-    for (let toInvestigateCellArray of neighborsWithSameValue) {
-      const cellToInvestigate = toInvestigateCellArray[0];
-      const searchDirection = toInvestigateCellArray[1];
-
-      switch (searchDirection) {
-        case 0:
-          potentialCellsToFormLine.push(cellToInvestigate.getNeighborTop());
-          break;
-        case 1:
-          potentialCellsToFormLine.push(cellToInvestigate.getNeighborLeft());
-          break;
-        case 2:
-          potentialCellsToFormLine.push(cellToInvestigate.getNeighborRight());
-          break;
-        case 3:
-          potentialCellsToFormLine.push(cellToInvestigate.getNeighborBottom());
-          break;
-        case 4:
-          potentialCellsToFormLine.push(cellToInvestigate.getNeighborTopLeft());
-          break;
-        case 5:
-          potentialCellsToFormLine.push(
-            cellToInvestigate.getNeighborTopRight()
-          );
-          break;
-        case 6:
-          potentialCellsToFormLine.push(
-            cellToInvestigate.getNeighborBottomLeft()
-          );
-          break;
-        case 7:
-          potentialCellsToFormLine.push(
-            cellToInvestigate.getNeighborBottomRight()
-          );
-          break;
-      }
-    }
-  }
-
-  console.log(neighborsWithSameValue);
-  console.log(potentialCellsToFormLine);
-
-  if (potentialCellsToFormLine.length > 0) {
-    for (let lastInvestigatedCell of potentialCellsToFormLine) {
-      if (lastInvestigatedCell !== undefined) {
-        if (lastInvestigatedCell.getValue() === cellValue)
-          console.log('Game Over');
-      }
-    }
+  for (let combination of winningCombinations) {
+    if (
+      combination[0].getValue() === combination[1].getValue() &&
+      combination[1].getValue() === combination[2].getValue() &&
+      typeof combination[0].getValue() === 'number'
+    )
+      return true;
   }
 }
 
-gameFlow.playTurn(0, 0);
-gameFlow.playTurn(0, 1);
-gameFlow.playTurn(2, 2);
-gameFlow.playTurn(1, 2);
-gameFlow.playTurn(1, 1);
+const renderBoard = () => {
+  const message = document.querySelector('.display-message');
+  const board = document.querySelector('.game-board');
+  const printedBoard = gameBoard.getBoard();
+  removeAllChildNodes(board);
+
+  for (let row of printedBoard) {
+    for (let cell of row) {
+      const newCell = document.createElement('div');
+      newCell.classList.add('board-square');
+      board.appendChild(newCell);
+      newCell.textContent = cell.getSymbol();
+      newCell.setAttribute('data-row', `${cell.getRow()}`);
+      newCell.setAttribute('data-col', `${cell.getCol()}`);
+    }
+  }
+
+  function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+      parent.removeChild(parent.firstChild);
+    }
+  }
+  const playerSymbol = gameLogic.getPlayerTurn().playerSymbol;
+  message.textContent = `Player ${playerSymbol}'s turn!`;
+};
+
+const playGame = () => {
+  renderBoard();
+  const cells = document.querySelectorAll('.board-square');
+  cells.forEach((cell) =>
+    cell.addEventListener('click', () => {
+      let row = +cell.getAttribute('data-row');
+      let col = +cell.getAttribute('data-col');
+      gameLogic.playTurn(row, col);
+    })
+  );
+};
+
+const restartGame = (() => {
+  const restartButton = document.querySelector('button');
+  restartButton.addEventListener('click', () => gameBoard.restartBoard());
+})();
+
+playGame();

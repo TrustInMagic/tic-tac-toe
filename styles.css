@@ -10,6 +10,7 @@
   --body-background-color: #e2e8f0;
   --message-color: #4b5563;
   --playing-board-background: #f8fafc;
+  --hover-color: #cffafe;
 }
 
 body {
@@ -72,5 +73,16 @@ button {
 }
 
 .board-square {
+  font-family: 'Varela Round', sans-serif;
   border: solid 0.5px var(--message-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 6rem;
+  cursor: pointer;
+  color: var(--message-color)
+}
+
+.board-square:hover {
+  background-color: var(--hover-color);
 }
