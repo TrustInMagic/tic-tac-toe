@@ -102,7 +102,6 @@ const gameLogic = (() => {
     
     if (moves === 9 && !checkWin(board)) {
       message.textContent = "It's a draw!";
-      console.log('draw');
     }
   };
 
