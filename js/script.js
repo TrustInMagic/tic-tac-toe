@@ -1,7 +1,5 @@
-const cell = (r, c) => {
+const cell = (row, col) => {
   let symbol = '';
-  let row = r;
-  let col = c;
   let value;
 
   const setValue = () => {
@@ -97,11 +95,13 @@ const gameLogic = (() => {
         toggleTurn();
         renderBoard();
         message.textContent = `Player ${activePlayer.playerSymbol} has won!`;
+        moves = 0;
       }
     }
-    
+
     if (moves === 9 && !checkWin(board)) {
       message.textContent = "It's a draw!";
+      moves = 0;
     }
   };
 

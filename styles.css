@@ -72,6 +72,16 @@ button {
   border: none;
 }
 
+button:hover {
+  background-color: var(--font-color);
+  color: var(--header-background-color);
+  box-shadow: 2px 2px 15px;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
 .board-square {
   font-family: 'Varela Round', sans-serif;
   border: solid 0.5px var(--message-color);
@@ -80,7 +90,7 @@ button {
   align-items: center;
   font-size: 6rem;
   cursor: pointer;
-  color: var(--message-color)
+  color: var(--message-color);
 }
 
 .board-square:hover {
