@@ -54,8 +54,8 @@ const playerFactory = (name, playerSymbol) => {
 };
 
 const gameLogic = (() => {
-  const playerOne = playerFactory('Bill', 'X');
-  const playerTwo = playerFactory('John', 'O');
+  const playerOne = playerFactory('Human', 'X');
+  const playerTwo = playerFactory('C-3PO', 'O');
   let activePlayer = playerOne;
   let moves = 0;
   const message = document.querySelector('.display-message');
@@ -68,7 +68,7 @@ const gameLogic = (() => {
 
   const restartActivePlayer = () => (activePlayer = playerOne);
 
-  const getPlayerTurn = () => activePlayer;
+  const getActivePlayer = () => activePlayer;
 
   const validateMove = (board, row, col) => {
     if (board[row][col].getSymbol() !== '') {
@@ -105,7 +105,7 @@ const gameLogic = (() => {
     }
   };
 
-  return { playTurn, restartActivePlayer, getPlayerTurn };
+  return { playTurn, restartActivePlayer, getActivePlayer };
 })();
 
 function checkWin(board) {
@@ -157,11 +157,11 @@ const renderBoard = () => {
       parent.removeChild(parent.firstChild);
     }
   }
-  const playerSymbol = gameLogic.getPlayerTurn().playerSymbol;
+  const playerSymbol = gameLogic.getActivePlayer().playerSymbol;
   message.textContent = `Player ${playerSymbol}'s turn!`;
 };
 
-const playGame = () => {
+const playGame = (type, move) => {
   renderBoard();
   const cells = document.querySelectorAll('.board-square');
   cells.forEach((cell) =>
@@ -171,11 +171,45 @@ const playGame = () => {
       gameLogic.playTurn(row, col);
     })
   );
+
+  if (type === 'PvE') {
+    cells.forEach((cell) =>
+      cell.addEventListener('click', () => {
+        console.log
+        // while (gameLogic.playTurn(...move) === false) gameLogic.playTurn(...move);
+      })
+    );
+  }
 };
 
 const restartGame = (() => {
-  const restartButton = document.querySelector('button');
+  const restartButton = document.querySelector('.game-area button');
   restartButton.addEventListener('click', () => gameBoard.restartBoard());
 })();
 
-playGame();
+const gameSelection = (() => {
+  const gameArea = document.querySelector('.game-area');
+  const playerVsPlayer = document.querySelector('.pvp');
+  const playerVsAI = document.querySelector('.pve');
+  gameArea.style.cssText = 'transform: scale(0)';
+
+  playerVsPlayer.addEventListener('click', () => {
+    gameArea.style.cssText = 'transform: scale(1)';
+    playGame();
+  });
+
+  playerVsAI.addEventListener('click', () => {
+    gameArea.style.cssText = 'transform: scale(1)';
+    aiGameplay();
+  });
+})();
+
+const aiGameplay = () => {
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+  playGame('PvE', [getRandomInt(3), getRandomInt(3)]);
+
+ 
+};
