@@ -161,7 +161,7 @@ const renderBoard = () => {
   message.textContent = `Player ${playerSymbol}'s turn!`;
 };
 
-const playGame = (type, move) => {
+const playGame = () => {
   renderBoard();
   const cells = document.querySelectorAll('.board-square');
   cells.forEach((cell) =>
@@ -171,15 +171,6 @@ const playGame = (type, move) => {
       gameLogic.playTurn(row, col);
     })
   );
-
-  if (type === 'PvE') {
-    cells.forEach((cell) =>
-      cell.addEventListener('click', () => {
-        console.log
-        // while (gameLogic.playTurn(...move) === false) gameLogic.playTurn(...move);
-      })
-    );
-  }
 };
 
 const restartGame = (() => {
@@ -208,8 +199,5 @@ const aiGameplay = () => {
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
   }
-
-  playGame('PvE', [getRandomInt(3), getRandomInt(3)]);
-
- 
+  playGame();
 };
