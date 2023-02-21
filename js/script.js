@@ -119,6 +119,8 @@ const gameLogic = (() => {
     }
 
     if (moves === 9 && !checkWin(board)) {
+      toggleTurn();
+      makeDomPlayAreaElementUnclickable();
       message.textContent = "It's a draw!";
       moves = 0;
     }
@@ -225,6 +227,7 @@ const aiGamePlay = () => {
         const board = gameBoard.getBoard();
         let row = getRandomInt(3);
         let col = getRandomInt(3);
+        console.log(gameLogic.getMoves())
 
         while (
           gameLogic.validateMove(board, row, col) === false &&
@@ -278,6 +281,7 @@ const pvpGameLogic = () => {
 
   playerSelector.addEventListener('submit', (event) => {
     event.preventDefault();
+    console.log('sloboz');
     let playerOne = playerOneInput.value;
     let playerTwo = playerTwoInput.value;
 
