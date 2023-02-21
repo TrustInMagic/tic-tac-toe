@@ -197,6 +197,8 @@ const linkDomCellsToLogic = () => {
 
 const pvpGamePlay = () => {
   renderBoard();
+  const cells = document.querySelectorAll('.board-square');
+  cells.forEach((cell) => cell.classList.remove('vs-ai'));
   linkDomCellsToLogic();
 };
 
@@ -212,6 +214,7 @@ const aiGamePlay = () => {
 
   cells.forEach((cell) =>
     cell.addEventListener('click', () => {
+      makeDomPlayAreaElementUnclickable();
       if (gameLogic.getActivePlayer().name === 'C-3PO') {
         const board = gameBoard.getBoard();
         let row = getRandomInt(3);
@@ -221,11 +224,13 @@ const aiGamePlay = () => {
           row = getRandomInt(3);
           col = getRandomInt(3);
         }
-
-        gameLogic.playTurn(row, col);
+        setTimeout(() => {
+          gameLogic.playTurn(row, col);
+        }, 1000);
       }
     })
   );
+  makeDomPlayAreaElementClickable();
 };
 
 const restartGame = (() => {
@@ -245,6 +250,7 @@ const gameSelection = (() => {
     gameBoard.restartBoard();
     playerSelector.style.cssText = 'transform: scale(1)';
     pvpGameLogic();
+    pvpGamePlay();
   });
 
   playerVsAI.addEventListener('click', () => {
