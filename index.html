@@ -22,15 +22,20 @@
       <h1>Tic-Tac-Toe</h1>
     </div>
     <div class="game-select">
-      <button class="pve">
+      <button class="ai">
         AI Bot
-        <img src="./assets/bot-svg.svg">
+        <img src="./assets/bot-svg.svg" />
       </button>
       <button class="pvp">
         Two Players
-        <img src="./assets/multiplayer-svg.svg">
+        <img src="./assets/multiplayer-svg.svg" />
       </button>
     </div>
+    <form action="" method="POST">
+      <input type="text" id="player1" placeholder="Player 1" required/>
+      <input type="text" id="player2" placeholder="Player 2" required/>
+      <button type="submit">Submit</button>
+    </form>
     <div class="game-area">
       <div class="display-message">Render Error :(</div>
       <div class="game-board"></div>

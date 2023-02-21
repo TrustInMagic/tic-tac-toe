@@ -54,8 +54,8 @@ const playerFactory = (name, playerSymbol) => {
 };
 
 const gameLogic = (() => {
-  const playerOne = playerFactory('Human', 'X');
-  const playerTwo = playerFactory('C-3PO', 'O');
+  let playerOne;
+  let playerTwo;
   let activePlayer = playerOne;
   let moves = 0;
   const message = document.querySelector('.display-message');
@@ -68,6 +68,12 @@ const gameLogic = (() => {
 
   const restartActivePlayer = () => (activePlayer = playerOne);
 
+  const setPlayerOne = (name) => {
+    playerOne = playerFactory(name, 'X');
+    activePlayer = playerOne;
+  };
+  const setPlayerTwo = (name) => (playerTwo = playerFactory(name, 'O'));
+
   const getActivePlayer = () => activePlayer;
 
   const validateMove = (board, row, col) => {
@@ -77,7 +83,6 @@ const gameLogic = (() => {
   };
 
   const playTurn = (row, col) => {
-    moves += 1;
     let player = activePlayer;
     let symbol = player.playerSymbol;
     const board = gameBoard.getBoard();
@@ -86,15 +91,15 @@ const gameLogic = (() => {
     if (!validateMove(board, row, col)) {
       return false;
     } else {
+      moves += 1;
       targetCell.changeSymbol(symbol);
       targetCell.setValue();
       toggleTurn();
-      renderBoard();
       playGame();
       if (checkWin(board)) {
         toggleTurn();
         renderBoard();
-        message.textContent = `Player ${activePlayer.playerSymbol} has won!`;
+        message.textContent = `${activePlayer.name} has won!`;
         moves = 0;
       }
     }
@@ -105,7 +110,13 @@ const gameLogic = (() => {
     }
   };
 
-  return { playTurn, restartActivePlayer, getActivePlayer };
+  return {
+    playTurn,
+    restartActivePlayer,
+    getActivePlayer,
+    setPlayerOne,
+    setPlayerTwo,
+  };
 })();
 
 function checkWin(board) {
@@ -157,8 +168,9 @@ const renderBoard = () => {
       parent.removeChild(parent.firstChild);
     }
   }
-  const playerSymbol = gameLogic.getActivePlayer().playerSymbol;
-  message.textContent = `Player ${playerSymbol}'s turn!`;
+
+  const playerName = gameLogic.getActivePlayer()?.name;
+  message.textContent = `${playerName}'s turn!`;
 };
 
 const playGame = () => {
@@ -181,23 +193,58 @@ const restartGame = (() => {
 const gameSelection = (() => {
   const gameArea = document.querySelector('.game-area');
   const playerVsPlayer = document.querySelector('.pvp');
-  const playerVsAI = document.querySelector('.pve');
+  const playerVsAI = document.querySelector('.ai');
+  const playerSelector = document.querySelector('form');
   gameArea.style.cssText = 'transform: scale(0)';
 
   playerVsPlayer.addEventListener('click', () => {
-    gameArea.style.cssText = 'transform: scale(1)';
-    playGame();
+    gameArea.style.cssText = 'transform: scale(0)';
+    gameBoard.restartBoard();
+    playerSelector.style.cssText = 'transform: scale(1)';
+    pvpGameplay();
   });
 
   playerVsAI.addEventListener('click', () => {
+    gameBoard.restartBoard();
     gameArea.style.cssText = 'transform: scale(1)';
     aiGameplay();
   });
 })();
 
+const pvpGameplay = () => {
+  const playerSelector = document.querySelector('form');
+  const playerOneInput = document.querySelector('#player1');
+  const playerTwoInput = document.querySelector('#player2');
+  const gameArea = document.querySelector('.game-area');
+
+  playerSelector.addEventListener('submit', (event) => {
+    event.preventDefault();
+    let playerOne = playerOneInput.value;
+    let playerTwo = playerTwoInput.value;
+
+    gameLogic.setPlayerOne(playerOne);
+    gameLogic.setPlayerTwo(playerTwo);
+
+    playerSelector.style.cssText = 'transform: scale(0)';
+    gameArea.style.cssText = 'transform: scale(1)';
+
+    const message = document.querySelector('.display-message');
+    const playerName = gameLogic.getActivePlayer().name;
+    message.textContent = `${playerName}'s turn!`;
+  });
+};
+
 const aiGameplay = () => {
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
   }
-  playGame();
+
+  gameLogic.setPlayerOne('Human');
+  gameLogic.setPlayerTwo('C-3PO');
+
+  const message = document.querySelector('.display-message');
+  const playerName = gameLogic.getActivePlayer().name;
+  message.textContent = `${playerName}'s turn!`;
+
+
 };
