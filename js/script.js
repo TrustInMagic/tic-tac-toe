@@ -41,7 +41,13 @@ const gameBoard = (() => {
     populateBoard();
     gameLogic.restartActivePlayer();
     renderBoard();
-    playGame();
+    makeDomPlayAreaElementClickable();
+
+    if (gameLogic.getActivePlayer()?.name !== 'Human') {
+      pvpGamePlay();
+    } else {
+      aiGamePlay();
+    }
   };
 
   const getBoard = () => board;
@@ -95,10 +101,14 @@ const gameLogic = (() => {
       targetCell.changeSymbol(symbol);
       targetCell.setValue();
       toggleTurn();
-      playGame();
+
+      if (playerOne.name !== 'Human') {
+        pvpGamePlay();
+      } else aiGamePlay();
+
       if (checkWin(board)) {
         toggleTurn();
-        renderBoard();
+        makeDomPlayAreaElementUnclickable();
         message.textContent = `${activePlayer.name} has won!`;
         moves = 0;
       }
@@ -116,6 +126,7 @@ const gameLogic = (() => {
     getActivePlayer,
     setPlayerOne,
     setPlayerTwo,
+    validateMove,
   };
 })();
 
@@ -173,14 +184,46 @@ const renderBoard = () => {
   message.textContent = `${playerName}'s turn!`;
 };
 
-const playGame = () => {
-  renderBoard();
+const linkDomCellsToLogic = () => {
   const cells = document.querySelectorAll('.board-square');
   cells.forEach((cell) =>
     cell.addEventListener('click', () => {
       let row = +cell.getAttribute('data-row');
       let col = +cell.getAttribute('data-col');
       gameLogic.playTurn(row, col);
+    })
+  );
+};
+
+const pvpGamePlay = () => {
+  renderBoard();
+  linkDomCellsToLogic();
+};
+
+const aiGamePlay = () => {
+  renderBoard();
+  const cells = document.querySelectorAll('.board-square');
+  cells.forEach((cell) => cell.classList.add('vs-ai'));
+  linkDomCellsToLogic();
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+
+  cells.forEach((cell) =>
+    cell.addEventListener('click', () => {
+      if (gameLogic.getActivePlayer().name === 'C-3PO') {
+        const board = gameBoard.getBoard();
+        let row = getRandomInt(3);
+        let col = getRandomInt(3);
+
+        while (gameLogic.validateMove(board, row, col) === false) {
+          row = getRandomInt(3);
+          col = getRandomInt(3);
+        }
+
+        gameLogic.playTurn(row, col);
+      }
     })
   );
 };
@@ -201,17 +244,18 @@ const gameSelection = (() => {
     gameArea.style.cssText = 'transform: scale(0)';
     gameBoard.restartBoard();
     playerSelector.style.cssText = 'transform: scale(1)';
-    pvpGameplay();
+    pvpGameLogic();
   });
 
   playerVsAI.addEventListener('click', () => {
-    gameBoard.restartBoard();
     gameArea.style.cssText = 'transform: scale(1)';
-    aiGameplay();
+    aiGameLogic();
+    aiGamePlay();
+    gameBoard.restartBoard();
   });
 })();
 
-const pvpGameplay = () => {
+const pvpGameLogic = () => {
   const playerSelector = document.querySelector('form');
   const playerOneInput = document.querySelector('#player1');
   const playerTwoInput = document.querySelector('#player2');
@@ -234,17 +278,21 @@ const pvpGameplay = () => {
   });
 };
 
-const aiGameplay = () => {
-  function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
-
+const aiGameLogic = () => {
   gameLogic.setPlayerOne('Human');
   gameLogic.setPlayerTwo('C-3PO');
 
   const message = document.querySelector('.display-message');
   const playerName = gameLogic.getActivePlayer().name;
   message.textContent = `${playerName}'s turn!`;
+};
 
+const makeDomPlayAreaElementUnclickable = () => {
+  const boardDomElement = document.querySelector('.game-board');
+  boardDomElement.classList.add('not-allowed');
+};
 
+const makeDomPlayAreaElementClickable = () => {
+  const boardDomElement = document.querySelector('.game-board');
+  boardDomElement.classList.remove('not-allowed');
 };
