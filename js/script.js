@@ -42,6 +42,7 @@ const gameBoard = (() => {
     gameLogic.restartActivePlayer();
     renderBoard();
     makeDomPlayAreaElementClickable();
+    gameLogic.setMoves(0);
 
     if (gameLogic.getActivePlayer()?.name !== 'Human') {
       pvpGamePlay();
@@ -81,6 +82,9 @@ const gameLogic = (() => {
   const setPlayerTwo = (name) => (playerTwo = playerFactory(name, 'O'));
 
   const getActivePlayer = () => activePlayer;
+
+  const getMoves = () => moves;
+  const setMoves = (value) => (moves = value);
 
   const validateMove = (board, row, col) => {
     if (board[row][col].getSymbol() !== '') {
@@ -127,6 +131,8 @@ const gameLogic = (() => {
     setPlayerOne,
     setPlayerTwo,
     validateMove,
+    setMoves,
+    getMoves,
   };
 })();
 
@@ -220,7 +226,10 @@ const aiGamePlay = () => {
         let row = getRandomInt(3);
         let col = getRandomInt(3);
 
-        while (gameLogic.validateMove(board, row, col) === false) {
+        while (
+          gameLogic.validateMove(board, row, col) === false &&
+          gameLogic.getMoves() < 9
+        ) {
           row = getRandomInt(3);
           col = getRandomInt(3);
         }
