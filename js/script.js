@@ -24,7 +24,7 @@ const gameBoard = (() => {
   const rows = 3;
   const cols = 3;
 
-  //drawing the board
+  //populating the board with cells
   const populateBoard = () => {
     for (let i = 0; i < rows; i++) {
       board[i] = [];

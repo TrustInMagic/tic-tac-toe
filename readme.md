@@ -2,7 +2,7 @@
 
 Live at: https://trustinmagic.github.io/tic-tac-toe/
 
-Tic-Tac-Toe game created with JS
+Tic-Tac-Toe game created with JS. Features game-play both PvP and vs AI.
 
 What I learned
 
